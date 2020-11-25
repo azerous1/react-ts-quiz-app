@@ -1,5 +1,5 @@
 import styled, { createGlobalStyle } from 'styled-components'
-import Image from './img/beach.jpg';
+import Image from './img/Fezbot-beach.jpeg';
 
 export const GlobalStyle = createGlobalStyle`
     html {
@@ -33,7 +33,7 @@ export const AppStyleWrapper = styled.div`
     .score {
         color: #fff;
         font-size: 2rem;
-        margin: 0;
+        margin-bottom: 2rem;
     }    
     
     h1 {
@@ -52,7 +52,7 @@ export const AppStyleWrapper = styled.div`
         margin: 20px;
     }
     
-    .start, .next {
+    .start, .next , .toggleReport {
         cursor: pointer;
         background: linear-gradient(180deg, #fff, #ffcc91);
         border: 2px solid #d38558;

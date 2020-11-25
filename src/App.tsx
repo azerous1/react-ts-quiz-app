@@ -1,8 +1,10 @@
 import React, {useState} from 'react';
 import {QuestionCard} from "./components/question-card";
 import {Difficulty, fetchQuestions, QuestionState} from "./api-tools/api";
-import {GlobalStyle} from "./style";
-import {AppStyleWrapper} from "./style";
+import {GlobalStyle, AppStyleWrapper} from "./style";
+import {QuestionCardStyleWrapper} from "./components/style";
+import generateComment from "./utils/generateComment";
+import getNumberOfCorrectAnswer from "./utils/getNumberOfCorrectAnswer";
 
 const TOTAL_QUESTIONS = 10;
 
@@ -11,7 +13,7 @@ export type UserAnswerObject = {
     answer: string,
     correct: boolean,
     correctAnswer: string,
-};
+} | undefined;
 
 const App = () => {
     const [loading, setLoading] = useState(false);
@@ -19,6 +21,7 @@ const App = () => {
     const [questionNum, setQuestionNum] = useState(0);
     const [userAnswers, setUserAnswers] = useState<UserAnswerObject[]>([])
     const [score, setScore] = useState(0);
+    const [report, setReport] = useState(false);
     const [gameOver, setGameOver] = useState(true);
 
     // 这个function 因为是开始游戏，然后app的state都跟游戏有关，所以要set全部的state
@@ -32,6 +35,7 @@ const App = () => {
             setUserAnswers([]);
             setQuestionNum(0);
             setLoading(false);
+            setReport(false);
         } catch (error) {
             console.log(error);
         }
@@ -63,10 +67,18 @@ const App = () => {
 
         // 如果现在的num 已经到达上限 （用现在来判断，而不是过去）
         if (nextQuestionNum === TOTAL_QUESTIONS) {
-            setGameOver(true)
+            setReport(true)
         } else {
+            if (!userAnswers[questionNum]) {
+                setUserAnswers(prevState => [...prevState, undefined])
+            }
             setQuestionNum(nextQuestionNum)
         }
+    }
+
+    const toggleReport = () => {
+        setReport(false);
+        setGameOver(true)
     }
 
     return (
@@ -83,7 +95,7 @@ const App = () => {
                     <p className='score'>Score: {score}</p>
                 ) : null}
                 {loading && <p>Loading Questions......</p>}
-                {!gameOver && !loading ? (
+                {!gameOver && !loading && !report ? (
                     <QuestionCard
                         question={questions[questionNum].question}
                         answers={questions[questionNum].allAnswers}
@@ -93,7 +105,18 @@ const App = () => {
                         totalQuestions={TOTAL_QUESTIONS}
                     />
                 ) : null}
-                {!gameOver && <button className='next' onClick={nextQuestion}>Next Question</button>}
+                {(!gameOver && !report) && <button className='next' onClick={nextQuestion}>Next Question</button>}
+                {report && (
+                    <QuestionCardStyleWrapper>
+                        <div>
+                            <p>You have scored {getNumberOfCorrectAnswer(userAnswers)} questions!</p>
+                            <p>{generateComment( getNumberOfCorrectAnswer(userAnswers) / TOTAL_QUESTIONS)}</p>
+                        </div>
+                        <button className='toggleReport' onClick={() => {toggleReport()}}>
+                            Ok
+                        </button>
+                    </QuestionCardStyleWrapper>
+                )}
             </AppStyleWrapper>
         </>
     );
